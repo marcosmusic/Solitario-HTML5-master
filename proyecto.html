@@ -1,0 +1,567 @@
+<!--Realizado por Carmen Molinero Peña-->
+<!DOCTYPE html>
+<html lang "es-ES" >
+	<head>
+		<meta charset="utf-8">
+		<title>Solitario</title>
+		<link rel="stylesheet" type="text/css" href="proyecto.css">
+	</head>
+
+	<body>
+		<header>
+			<h1>SOLITARIO</h1>
+			<!--<h2>Integración de servicios telemáticos</h2>
+			<h3>Práctica número 4</h3>-->
+			<p>Tiempo: <span id="time"></span><p>
+		</header>
+
+		<section class="solitario">
+
+			<div class="hueco arriba" id="origen" style="position: relative;"></div>
+			<div class="hueco " id="destino1" style="position: relative;"></div>
+
+			<div class="hueco fin" id="fin1" style="position: relative;"></div>
+			<div class="hueco fin" id="fin2" style="position: relative;"></div>
+			<div class="hueco fin" id="fin3" style="position: relative;"></div>
+			<div class="hueco fin" id="fin4" style="position: relative;"></div>
+
+			<div class="hueco abajo destino" id="destino2" style="position: relative;"></div>
+			<div class="hueco destino" id="destino3" style="position: relative;"></div>
+			<div class="hueco destino" id="destino4" style="position: relative;"></div>
+			<div class="hueco destino" id="destino5" style="position: relative;"></div>
+			<div class="juegoNuevo">
+				<button  type="button" onclick="juegoNuevo()">Juego Nuevo</button>
+			</div>
+
+
+		</section>
+
+
+		<!--Script para llevar el contador de tiempo-->
+		<script>
+			var time = document.getElementById("time");
+
+			var horas = 0;
+			var min = 0;
+			var sec = 0;
+			time.innerHTML = horas+"h " + min + "m " + sec +"s ";
+			setInterval(function (){
+				sec++;
+
+				if (sec>59){
+					min ++;
+					sec = 0;
+					if (min>59){
+						horas++;
+						min = 0;
+					}
+				}
+				time.innerHTML = horas+"h " + min + "m " + sec +"s ";
+
+			},1000);
+			
+		</script>
+
+		<!-- Script para llevar todas las barajas-->
+		<script >
+			//declaración de todos los tapetes
+			var origen = document.getElementById('origen');	//tapete de inicio 
+			var destino = document.getElementById('destino1');//tapete destino1 	
+			var num_mov = 0;
+			var destino2 = document.getElementById('destino2');
+			var destino3 = document.getElementById('destino3');
+			var destino4 = document.getElementById('destino4');
+			var destino5 = document.getElementById('destino5');
+
+			var fin1 = document.getElementById('fin1');
+			var fin2 = document.getElementById("fin2");
+			var fin3 = document.getElementById("fin3");
+			var fin4 = document.getElementById("fin4");
+
+	
+			//decalado de las cartas de la baraja 
+			var decalado_xOrigen=2;
+			var decalado_yOrigen=2;
+			var decalado_xDestino1=53;
+			var decalado_yDestino1=53;
+			
+			//barajas de los distintos tapetes
+			var baraja = crearBaraja();//creacion  la baraja inicial 
+
+			var barajaDestino2 = [];//baraja del primer tapete
+			var barajaDestino3 = [];//baraja del segundo tapete
+			var barajaDestino4 = [];//baraja del tercer tapete
+			var barajaDestino5 = [];//baraja del cuarto tapete
+
+
+			var barajaFin1 = []; 
+			var barajaFin2 = []; 
+			var barajaFin3 = []; 
+			var barajaFin4 = []; 
+
+
+			barajar(baraja);//barajado de la baraja inicial 
+			posicionOrigen(baraja);//coloca la baraja en el tapete de origen
+
+			var elemBaraja=baraja.length;//elementos que hay en la baraja actual 
+			var carta_nueva=[];
+			
+			var nextCarta = baraja[elemBaraja-1];//siguiente carta que se puede coger
+			nextCarta.draggable=true;
+
+			var elemBarajaDestino = 0;
+			var elemBarajaDestino2 = 0;
+			var elemBarajaDestino3 = 0;
+			var elemBarajaDestino4 = 0;
+			var elemBarajaDestino5 = 0;
+
+			var elemBarajaFin1 = 0;
+			var elemBarajaFin2 = 0;
+			var elemBarajaFin3 = 0;
+			var elemBarajaFin4 = 0;
+
+			// para mover las cartas por el tapete 
+			nextCarta.ondragstart = funOnStart;
+			nextCarta.ondrag = funOnDrag;
+			nextCarta.ondragend = funOnDragend;
+
+			carta_nueva.ondragstart = funOnStart;
+			carta_nueva.ondrag = funOnDrag;
+			carta_nueva.ondragend = funOnDragend;
+
+			//para poder soltar las cartas en los distintos tapetes
+			destino.ondragenter= funOnDragenter;
+			destino.ondragover= funOnDragover;
+			destino.ondragleave= funOnDragleave;
+			destino.ondrop= funOnDrop;
+
+			destino2.ondragenter = funOnDragenter;
+			destino2.ondragover = funOnDragover;
+			destino2.ondragleave = funOnDragleave;
+			destino2.ondrop = funOnDrop2;
+
+			destino3.ondragenter = funOnDragenter;
+			destino3.ondragover = funOnDragover;
+			destino3.ondragleave = funOnDragleave;
+			destino3.ondrop = funOnDrop3;
+
+			destino4.ondragenter = funOnDragenter;
+			destino4.ondragover = funOnDragover;
+			destino4.ondragleave = funOnDragleave;
+			destino4.ondrop = funOnDrop4;
+
+			destino5.ondragenter = funOnDragenter;
+			destino5.ondragover = funOnDragover;
+			destino5.ondragleave = funOnDragleave;
+			destino5.ondrop = funOnDrop5;
+
+			fin1.ondragenter = funOnDragenter;
+			fin1.ondragover = funOnDragover;
+			fin1.ondragleave = funOnDragleave;
+			fin1.ondrop = funOnDropFin1;
+
+			fin2.ondragenter = funOnDragenter;
+			fin2.ondragover = funOnDragover;
+			fin2.ondragleave = funOnDragleave;
+			fin2.ondrop = funOnDropFin2;
+
+			fin3.ondragenter = funOnDragenter;
+			fin3.ondragover = funOnDragover;
+			fin3.ondragleave = funOnDragleave;
+			fin3.ondrop = funOnDropFin3;
+
+			fin4.ondragenter = funOnDragenter;
+			fin4.ondragover = funOnDragover;
+			fin4.ondragleave = funOnDragleave;
+			fin4.ondrop = funOnDropFin4;
+
+			
+		//función para inicializar la baraja
+		function juegoNuevo(){
+			location.reload();
+		}
+			function crearBaraja(){				
+				var mazo = [];
+				var aux_mazo=[];
+				var palo = ["rombos","treboles","corazones","picas"];
+				var color = ["rojo","negro","rojo","negro"];
+				var figura = ["rey","reina","jota","10","9","8","7","6","5","4","3","2","as"];
+				var orden = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+				var ordenFinal = [12, 11, 10, 9,8, 7, 6, 5, 4, 3, 2, 1, 0];
+				
+				for(var i = 0; i<palo.length;i++){
+					for (var j = 0; j<figura.length; j++){
+						var carta = document.createElement('img');
+						var id = figura[j]+"-"+palo[i];
+						carta.src = "baraja/"+figura[j]+"-"+palo[i]+".png";
+						carta.id = id;
+						carta.setAttribute("data-palo",palo[i]) ;
+						carta.setAttribute("data-figura",figura[j]) ;
+						carta.setAttribute("data-orden",orden[j]);
+						carta.setAttribute("data-ordenFinal",ordenFinal[j]);
+						carta.setAttribute("data-color",color[i]);
+						carta.draggable = true;
+						carta.width = 55;
+						carta.height =75;
+						aux_mazo[j] = carta;
+					}
+					mazo = mazo.concat(aux_mazo);
+				}
+
+				return mazo;
+
+			}
+
+			//baraja el mazo de cartas
+			function barajar(mazo){
+				for(var i = 0; i < mazo.length; i++) {
+					var indice = getRandomInt(1,mazo.length);
+					var cartaElemHTML = mazo[i];
+					mazo[i]=mazo[indice];
+					mazo[indice]=cartaElemHTML;
+				}
+			}
+
+
+			// función para obtener un número random entero 
+			function getRandomInt(min,max){
+				return Math.floor(Math.random()*(max-min))+min;
+			}
+
+			//coloca las cartas en el tapete de origen 
+			function posicionOrigen(mazo){
+					for(var i = 0; i<mazo.length;i++){
+						if (mazo[i]){
+
+							mazo[i].style.position=("absolute");
+
+
+							mazo[i].style.top=decalado_yOrigen+'px';
+							mazo[i].style.left=decalado_xOrigen+'px';
+							decalado_xOrigen+=2;
+							decalado_yOrigen+=2;
+							origen.appendChild(mazo[i]);
+						}
+					}
+
+			}
+			
+			//acumula el estado de la carta actual 
+			function acumularEstado( elem, estado ) {
+				with (elem) {
+					if ( estado == estadoAnterior ) {
+						veces++;
+						elemento.innerHTML = estadoAcumulado + estado + "(" + veces + ")";
+					} else {
+						if (estadoAnterior!=estadoInicial) {
+							estadoAcumulado += estadoAnterior + "(" + veces + ")-";
+							elemento.innerHTML = estadoAcumulado + estado + "(1)-";
+						}
+						estadoAnterior = estado;
+						veces = 1;
+					}
+				}
+			}
+
+			//funcion para comprobar el final del juego
+			function fin (){
+
+				if (elemBaraja == 0 && elemBarajaDestino == 0 && elemBarajaDestino2==0 && elemBarajaDestino3==0 && elemBarajaDestino4==0 && elemBarajaDestino5==0){
+					var tiempo =document.getElementById("time").innerHTML;
+					alert("Fin del Juego"+" -- "+"Núm. Movimientos: "+num_mov+ " -- "+"Tiempo utilizado:"+tiempo);
+				}
+
+			}
+
+			//función para llevar las cartas del tapete sobrante al inicial
+			function reiniciar(){
+				decalado_xOrigen=2;
+				decalado_yOrigen=2;
+				
+				while(carta_nueva.length!=0){
+					baraja.push(carta_nueva.pop());
+				}
+				elemBaraja = baraja.length;
+				elemBarajaDestino = carta_nueva.length;
+				
+				fin();
+				barajar(baraja);
+				posicionOrigen(baraja);
+
+			}
+
+			function funOnStart(e){ 
+				e.target.classList.add("arrastrando");
+				e.dataTransfer.setData("text", e.target.id);
+				e.dataTransfer.effectAllowed='move';
+			}
+			function funOnDrag (e) {}
+			function funOnDragend (e) {
+				e.target.classList.remove("arrastrando");
+			}
+			function funOnDragenter(e) {
+				e.preventDefault();
+			}
+			function funOnDragover(e) {
+				e.preventDefault();
+
+				e.dataTransfer.dropEffect='move';
+				this.style.border="solid thin red";
+
+			}
+			function funOnDragleave(e) {
+				e.preventDefault();
+				this.style.border="solid thin white";
+			}
+
+			// comprueba de donde procede la carta que se está arrastrando, y dependiendo de su procedencia elimina la carta del vector correspondiente
+			function compruebaProcedencia(cartaActual){
+				if ((elemBaraja>0)&&cartaActual.id == baraja[elemBaraja-1].id){ //si procede del mazo inicial
+					console.log("idCartaActual "+ cartaActual.id );
+					console.log("idBaraja "+ baraja[elemBaraja-1].id );
+					baraja.pop();
+					elemBaraja=baraja.length;
+					nextCarta = baraja[elemBaraja-1];
+
+
+				}else if ((elemBarajaDestino>0)&&cartaActual.id == carta_nueva[elemBarajaDestino-1].id){//si procede del mazo de sobrantes
+					carta_nueva.pop();
+					elemBarajaDestino=carta_nueva.length;
+					nextCarta = carta_nueva[elemBarajaDestino-1];
+					
+				}else if((elemBarajaDestino2>0)&&cartaActual.id == barajaDestino2[elemBarajaDestino2-1].id){//si procede del tapete destino2
+					barajaDestino2.pop();
+					elemBarajaDestino2=barajaDestino2.length;
+					nextCarta = barajaDestino2[elemBarajaDestino2-1];
+
+
+				}else if((elemBarajaDestino3>0)&&cartaActual.id == barajaDestino3[elemBarajaDestino3-1].id){//si procede del tapete destino3 
+					barajaDestino3.pop();
+					elemBarajaDestino3=barajaDestino3.length;
+					nextCarta = barajaDestino3[elemBarajaDestino3-1];
+
+				}else if((elemBarajaDestino4>0)&&cartaActual.id == barajaDestino4[elemBarajaDestino4-1].id){//si procede del tapete destino3 
+					barajaDestino4.pop();
+					elemBarajaDestino4=barajaDestino4.length;
+					nextCarta = barajaDestino4[elemBarajaDestino4-1];
+
+				}else if((elemBarajaDestino5>0)&&cartaActual.id == barajaDestino5[elemBarajaDestino5-1].id){//si procede del tapete destino3 
+					barajaDestino5.pop();
+					elemBarajaDestino5=barajaDestino5.length;
+					nextCarta = barajaDestino5[elemBarajaDestino5-1];
+
+				}
+
+				if (elemBaraja == 0){
+
+
+					reiniciar();
+				}
+
+				if (nextCarta){
+					nextCarta.ondragstart = funOnStart;
+					nextCarta.ondrag = funOnDrag;
+					nextCarta.ondragend = funOnDragend;
+				}
+			}
+
+			// suelta la carta en su destino 
+			function soltarDestino (barajaFin, destino, cartaActual){
+				elemBarajaFin = barajaFin.length;
+				barajaFin.push(cartaActual.cloneNode());
+				barajaFin[elemBarajaFin].style.position=("absolute");
+
+
+				barajaFin[elemBarajaFin].style.top=0;
+				barajaFin[elemBarajaFin].style.left=0;
+				barajaFin[elemBarajaFin].ondragstart = funOnStart;
+				barajaFin[elemBarajaFin].ondrag = funOnDrag;
+				barajaFin[elemBarajaFin].ondragend = funOnDragend;
+
+				destino.appendChild(barajaFin[elemBarajaFin]);
+
+				cartaActual.parentNode.removeChild(cartaActual);
+				num_mov ++;
+				compruebaProcedencia(cartaActual);
+			}
+
+			function soltarFin(barajaFin, destino, cartaActual){
+				elemBarajaFin=barajaFin.length;
+				barajaFin.push(cartaActual.cloneNode());
+				barajaFin[elemBarajaFin].style.position=("absolute");
+				barajaFin[elemBarajaFin].style.top="0px";
+				barajaFin[elemBarajaFin].style.left="0px";
+				destino.appendChild(barajaFin[elemBarajaFin]);
+
+				cartaActual.parentNode.removeChild(cartaActual);
+				num_mov ++;
+				compruebaProcedencia(cartaActual);
+			}
+
+			function compruebaPosicionDestino(barajaFin,destino,cartaActual){
+				elemBarajaFin = barajaFin.length;
+				if ((elemBarajaFin == 0) && cartaActual.getAttribute("data-orden") ==0 ){
+					soltarDestino(barajaFin,destino,cartaActual);
+				}else if ((elemBarajaFin ==  cartaActual.getAttribute("data-orden"))&&(barajaFin[elemBarajaFin-1].getAttribute("data-color")!=cartaActual.getAttribute("data-color"))){
+					soltarDestino(barajaFin,destino,cartaActual);
+
+				}
+
+				elemBarajaFin = barajaFin.length;
+
+				
+			}
+
+			//comprueba que la posición en los tapetes finales es la correcta 
+			function comprobarPosicionFin (barajaFin, destino, cartaActual){
+				elemBarajaFin = barajaFin.length;	
+
+				if (elemBarajaFin == 0 && cartaActual.getAttribute("data-ordenFinal")==0){ 
+					soltarFin(barajaFin,destino,cartaActual);
+
+				}
+				else if (((barajaFin[elemBarajaFin-1].getAttribute("data-ordenFinal")) == cartaActual.getAttribute("data-ordenFinal")-1) && (barajaFin[elemBarajaFin-1].getAttribute("data-palo")==cartaActual.getAttribute("data-palo"))){
+
+					soltarFin(barajaFin,destino,cartaActual);
+				}
+				
+			}
+
+			function funOnDrop(e) {
+				this.style.border="solid thin white";
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				console.log("data=" + data);
+				var carta = document.getElementById(data);
+
+
+				carta.parentNode.removeChild(carta);
+				
+				carta_nueva.push(carta.cloneNode());
+				carta_nueva[elemBarajaDestino].style.position=("absolute");
+				carta_nueva[elemBarajaDestino].style.top=0;
+				carta_nueva[elemBarajaDestino].style.left=0;
+
+				carta_nueva[elemBarajaDestino].ondragstart = funOnStart;
+				carta_nueva[elemBarajaDestino].ondrag = funOnDrag;
+				carta_nueva[elemBarajaDestino].ondragend = funOnDragend;
+				
+				this.appendChild(carta_nueva[elemBarajaDestino]);
+				baraja.pop();
+				elemBaraja=baraja.length;
+				elemBarajaDestino=carta_nueva.length;
+				num_mov ++;
+				if(elemBaraja > 0){
+					nextCarta=baraja[elemBaraja-1];
+
+				}
+				else
+					reiniciar();
+				
+				nextCarta.ondragstart = funOnStart;
+				nextCarta.ondrag = funOnDrag;
+				nextCarta.ondragend = funOnDragend;
+
+			}
+	
+			function funOnDrop2(e) {
+				this.style.border="solid thin white";
+
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				console.log("data=" + data);
+				var carta = document.getElementById(data);
+
+				compruebaPosicionDestino(barajaDestino2,destino2,carta);
+
+				elemBarajaDestino2=barajaDestino2.length;		
+				
+			}
+
+			function funOnDrop3(e) {
+				this.style.border="solid thin white";
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				var carta = document.getElementById(data);
+			
+				compruebaPosicionDestino(barajaDestino3,destino3,carta);
+				elemBarajaDestino3=barajaDestino3.length;
+				
+			}
+
+			function funOnDrop4(e) {
+				this.style.border="solid thin white";
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				var carta = document.getElementById(data);
+
+				compruebaPosicionDestino(barajaDestino4,destino4,carta);
+				elemBarajaDestino4=barajaDestino4.length;
+				
+			}
+
+			function funOnDrop5(e) {
+				this.style.border="solid thin white";
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				var carta = document.getElementById(data);
+
+				compruebaPosicionDestino(barajaDestino5,destino5,carta);
+				elemBarajaDestino5=barajaDestino5.length;
+				
+			}
+
+			// funciones para manejar el Ondrop en los tapetes finales 
+			function funOnDropFin1(e){
+				this.style.border="solid thin white";
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				var carta = document.getElementById(data);
+				
+				comprobarPosicionFin(barajaFin1, fin1, carta);
+				elemBarajaFin1 = barajaFin1.length;	
+				
+			}
+
+			function funOnDropFin2(e){
+				this.style.border="solid thin white";
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				console.log("data=" + data);
+				var carta = document.getElementById(data);
+				
+				comprobarPosicionFin(barajaFin2, fin2, carta);
+				elemBarajaFin2 = barajaFin2.length;	
+				
+			}
+
+			function funOnDropFin3(e){
+				this.style.border="solid thin white";
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				console.log("data=" + data);
+				var carta = document.getElementById(data);
+				
+				comprobarPosicionFin(barajaFin3, fin3, carta);
+				elemBarajaFin3 = barajaFin3.length;	
+			
+			}
+
+			function funOnDropFin4(e){
+				this.style.border="solid thin white";
+				e.preventDefault();
+				var data=e.dataTransfer.getData("text");
+				console.log("data=" + data);
+				var carta = document.getElementById(data);
+				
+				comprobarPosicionFin(barajaFin4, fin4, carta);
+				elemBarajaFin4 = barajaFin4.length;	
+			
+			}
+
+
+		</script>
+	</body>
+	
+
+</html>

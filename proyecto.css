@@ -1,0 +1,49 @@
+/*Realizado por Carmen Molinero Peña*/
+html {
+	font-size: 15pt;
+	font-family: "Courier New",serif ;
+	color: white;
+	
+}
+body{
+	background-image: url("baraja/tapete.jpg");
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: 100% 100%;
+}
+
+div.arriba{
+	float: left;
+}
+
+
+div.abajo{
+	clear: both;
+	float: left;
+}
+
+div.hueco{ 
+	float: left;
+	width: 160px;
+	height: 180px;
+	margin: 10px;
+	border: solid thin white;
+	border-radius: 10px;
+	cursor: move;
+
+}
+div.destino{
+	width: 55px;
+	height: 75px;
+}
+
+
+div.fin{ 
+	float: left;
+	width: 55px;
+	height: 75px;
+
+}
+.juegoNuevo{
+	clear: both;
+}
